@@ -11,6 +11,7 @@ import os
 # Config
 page_icon = Image.open("images/icon.png")
 st.set_page_config(layout="centered", page_title="Floodify - Detect & Caption", page_icon=page_icon)
+huggingface-cli login
 
 # Initial State
 def initial_state():
