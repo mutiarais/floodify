@@ -7,6 +7,7 @@ import torch
 from transformers import PaliGemmaForConditionalGeneration, PaliGemmaProcessor
 import glob
 import os
+from huggingface_hub import login
 
 # Config
 page_icon = Image.open("images/icon.png")
