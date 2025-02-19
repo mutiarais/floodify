@@ -4,7 +4,7 @@ import time
 from PIL import Image
 from ultralytics import YOLO
 import torch
-from transformers import PaliGemmaForConditionalGeneration, PaliGemmaProcessor
+# from transformers import PaliGemmaForConditionalGeneration, PaliGemmaProcessor
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import glob
 import os
