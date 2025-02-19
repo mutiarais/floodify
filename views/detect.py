@@ -5,6 +5,7 @@ from PIL import Image
 from ultralytics import YOLO
 import torch
 from transformers import PaliGemmaForConditionalGeneration, PaliGemmaProcessor
+from transformers import BlipProcessor, BlipForConditionalGeneration
 import glob
 import os
 from huggingface_hub import login
@@ -114,20 +115,40 @@ def yolo_detect(image_path):
         return None
 
 # Captioning PaliGemma
+# def generate_caption(image_path):
+#     try:
+#         processor = PaliGemmaProcessor.from_pretrained("google/paligemma-3b-mix-224")
+#         model = PaliGemmaForConditionalGeneration.from_pretrained("google/paligemma-3b-mix-224", torch_dtype=torch.bfloat16)
+#         # model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+
+#         image = Image.open(image_path).convert("RGB")
+#         input_text = "<image> Caption:"
+#         inputs = processor(text=input_text, images=image,
+#                            padding="longest", do_convert_rgb=True, return_tensors="pt")
+
+#         with torch.no_grad():
+#             outputs = model.generate(**inputs, max_length=496)
+#         caption = processor.batch_decode(outputs, skip_special_tokens=True)[0]
+
+#         return caption
+#     except Exception as e:
+#         st.error(f"Error: {e}")
+#         return None
+
+# Captioning BLIP
 def generate_caption(image_path):
     try:
-        processor = PaliGemmaProcessor.from_pretrained("google/paligemma-3b-mix-224")
-        model = PaliGemmaForConditionalGeneration.from_pretrained("google/paligemma-3b-mix-224", torch_dtype=torch.bfloat16)
+        processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+        model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
         # model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
         image = Image.open(image_path).convert("RGB")
-        input_text = "<image> Caption:"
-        inputs = processor(text=input_text, images=image,
-                           padding="longest", do_convert_rgb=True, return_tensors="pt")
+        inputs = processor(images=image, return_tensors="pt").to(model.device)
 
         with torch.no_grad():
-            outputs = model.generate(**inputs, max_length=496)
-        caption = processor.batch_decode(outputs, skip_special_tokens=True)[0]
+            outputs = model.generate(**inputs, max_length=50)
+
+        caption = processor.decode(outputs[0], skip_special_tokens=True)
 
         return caption
     except Exception as e:
