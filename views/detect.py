@@ -38,7 +38,7 @@ def progress_bar():
         my_bar.progress(percent_complete + 1)
 
 # Logo 
-col1, col2, col3 = st.columns([0.25, 1, 0.25])
+col1, col2, col3 = st.columns([0.5, 1, 0.5])
 col2.image("images/FLOODIFY2.png", width=200)
 new_line(2)
 
@@ -92,10 +92,34 @@ if st.session_state.image is None:
     # URL
     elif uploading_way == "url":
         url = st.text_input("Enter URL")
-        if url:
-            st.session_state.image = url
-            st.image(url, caption="Image from URL", use_container_width=True)
 
+        if url:
+            try:
+                # Coba request gambar dari URL
+                response = requests.get(url, timeout=5)
+                response.raise_for_status()  # Cek apakah ada error HTTP
+                
+                # Periksa apakah response adalah gambar
+                content_type = response.headers.get("Content-Type", "")
+                if "image" not in content_type:
+                    st.error("Invalid URL: The link does not point to an image.")
+                else:
+                    # Buka gambar dan simpan ke session state
+                    image = Image.open(BytesIO(response.content))
+                    st.session_state.image = image
+                    st.image(image, caption="Image from URL", use_container_width=True)
+
+            except requests.exceptions.MissingSchema:
+                st.error("Invalid URL: The URL format is incorrect.")
+            except requests.exceptions.ConnectionError:
+                st.error("Invalid URL: Could not connect to the server.")
+            except requests.exceptions.Timeout:
+                st.error("Invalid URL: The request timed out.")
+            except requests.exceptions.RequestException:
+                st.error("Invalid URL: Unable to fetch image. Please check the link.")
+            except Exception as e:
+                st.error(f"Error: {e}")
+                
     new_line()
     st.markdown("<h2 align='center'>  🤖 Gender Detection & Generate Caption </h2>", unsafe_allow_html=True)
 
